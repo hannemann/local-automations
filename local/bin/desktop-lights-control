@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+. ${HOME}/.local/etc/desktop-lights-control.conf
+cd ${LISTS_DIR}
+shopt -s extglob
+
+while true; do
+	PAYLOAD=${DEFAULT_PAYLOAD:-default}
+	for FILE in *; do
+		readarray -t BINARIES < ${LISTS_DIR}${FILE}
+		for ((i =0; i < ${#BINARIES[@]}; i++)) do
+			if [[ ! -z $(pgrep -nf "${BINARIES[$i]}")  ]]; then
+				PAYLOAD=${FILE##+([0-9])-}
+				break
+			fi
+		done
+	done
+	if ${DEBUG}; then
+		echo ${BIN_PUB} -h ${HOST} -u ${USER} -P ${PASS} -t ${TOPIC} -m ${PAYLOAD}
+	fi
+	${BIN_PUB} -h ${HOST} -u ${USER} -P ${PASS} -t ${TOPIC} -m ${PAYLOAD}
+	sleep 5
+done

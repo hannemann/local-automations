@@ -1,0 +1,9 @@
+[Unit]
+Description=Steam remote control via MQTT
+After=default.target
+
+[Service]
+ExecStart=/bin/bash %h/.local/bin/steam-remote
+
+[Install]
+WantedBy=default.target

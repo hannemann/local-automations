@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+. $HOME/.local/etc/mqtt-broker.conf
+
+TP_STAT=stat/steam/hannemann
+TP_REMOTE=steam/remote/desktop-hannemann
+CAN_RUN=true
+
+function pubState()
+{
+	$BIN_PUB -h $HOST -u $USER -P $PASS -t $TP_STAT -m $1
+}
+
+function cleanup()
+{
+	CAN_RUN=false
+	pubState off
+}
+
+trap "cleanup" SIGINT SIGTERM SIGKILL
+
+while [ $CAN_RUN ]; do
+	sleep 5
+	RUNNING=$(/usr/bin/pgrep -f 'steam.sh' > /dev/null && echo on || echo off)
+	pubState $RUNNING
+done &
+
+
+while read msg;
+do
+	case $msg in
+		restart)
+			/usr/bin/steam -shutdown;
+			sleep 10
+			/usr/bin/pgrep -f 'steam.sh' > /dev/null && /usr/bin/pkill -F $HOME/.steampid;
+			sleep 5
+			echo "DISPLAY=:0 /usr/bin/gtk-launch steam" | at now > /dev/null
+			;;
+		start)
+			echo "DISPLAY=:0 /usr/bin/gtk-launch steam" | at now > /dev/null
+			;;
+		stop)
+			/usr/bin/steam -shutdown;
+			;;
+		bigpicture)
+			/usr/bin/steam steam://open/bigpicture;
+			;;
+		witchertwokill)
+			/usr/bin/pkill -9 witcher2.EXE;
+			;;
+		eldenkill)
+			/usr/bin/pkill -9 eldenring.exe;
+			;;
+		diablo4start)
+			/usr/bin/gtk-launch "Diablo IV";
+			;;
+		steamkill)
+			/usr/bin/pkill -F $HOME/.steampid;
+			;;
+		alttab)
+			DISPLAY=:0 /usr/bin/xdotool keydown alt key Tab; sleep 0.2; DISPLAY=:0 /usr/bin/xdotool keyup alt;
+			;;
+		screenUltraWide)
+			$HOME/.local/bin/setresolution HDMI-1 full
+			;;
+		screenFullHD)
+			$HOME/.local/bin/setresolution HDMI-1 hd 
+			;;
+		audioHdmi)
+			/usr/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.hdmi-stereo
+			;;
+		*)
+			;;
+	esac
+done < <( $BIN_SUB -h $HOST -u $USER -P $PASS -t $TP_REMOTE -q 1 --will-topic $TP_STAT --will-payload off)
+
+echo Steam Remote exit...

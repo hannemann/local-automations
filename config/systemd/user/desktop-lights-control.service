@@ -1,0 +1,9 @@
+[Unit]
+Description=Control monitor lights automagically
+After=default.target
+
+[Service]
+ExecStart=/bin/bash %h/.local/bin/desktop-lights-control
+
+[Install]
+WantedBy=default.target
