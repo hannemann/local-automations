@@ -87,6 +87,8 @@ install-g15daemon:
 	sudo /usr/bin/systemctl daemon-reload 
 	sudo /usr/bin/systemctl enable --now g15daemon.service
 	sudo /usr/bin/systemctl enable --now g15daemon-suspend-resume.service
+	install -m 644 ./g15daemon/Xmodmap $$HOME/.Xmodmap
+	/usr/bin/xmodmap $$HOME/.Xmodmap
 
 uninstall-g15daemon:
 	- sudo /usr/bin/systemctl disable --now g15daemon.service
@@ -100,3 +102,35 @@ uninstall-g15daemon:
 	cd $$HOME/src/libg15render && sudo make uninstall
 	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/g15daemon.git
 	cd $$HOME/src/g15daemon && sudo make uninstall
+
+install-g15stats:
+	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/g15daemon-addons.git
+	cd $$HOME/src/g15daemon-addons && git pull
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && autoupdate 
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && ./autogen.sh 
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && ./configure 
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && && make && sudo make install 
+
+uninstall-g15stats:
+	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/g15daemon-addons.git
+	cd $$HOME/src/g15daemon-addons && git pull
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && autoupdate
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && ./autogen.sh
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && ./configure
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15stats && sudo make uninstall
+
+install-g15-utils:
+	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/g15daemon-addons.git
+	cd $$HOME/src/g15daemon-addons && git pull
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && autoupdate
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && ./autogen.sh
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && ./configure
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && make && sudo make install
+
+uninstall-g15-utils:
+	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/g15daemon-addons.git
+	cd $$HOME/src/g15daemon-addons && git pull
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && autoupdate
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && ./autogen.sh
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && ./configure
+	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && sudo make uninstall
