@@ -21,8 +21,8 @@ install:
 	# config
 	[ -f /etc/ha-mqtt-broker.conf ] || sudo install -g ${USER} -m 640 -pD ./root/etc/ha-mqtt-broker.conf /etc/ha-mqtt-broker.conf
 	[ -f $$HOME/.local/etc/desktop-lights-control.conf ] || install -m 700 -pD ./local/etc/desktop-lights-control.conf $$HOME/.local/etc/desktop-lights-control.conf
-	[ -d $$HOME/.local/etc/desktop-lights-control.d ] || install -m 700 -pD ./local/etc/desktop-lights-control.d/games $$HOME/.local/etc/desktop-lights-control.d/games
-	install -m 640 ./config/pulse-scripts/entities $$HOME/.config/pulse-scripts/entities
+	[ -d $$HOME/.local/etc/desktop-lights-control.d ] || install -m 700 -pD ./local/etc/desktop-lights-control.d/* -t $$HOME/.local/etc/desktop-lights-control.d/
+	install -m 640 -pD ./config/pulse-scripts/entities $$HOME/.config/pulse-scripts/entities
 	$(MAKE) mqtt-config
 	$(MAKE) install-mqtt-online-status
 	# systemd
@@ -77,8 +77,8 @@ mqtt-config:
 	sudo sed -i "s|MQTT_TOPIC_AFFIX_MACHINE=.*|MQTT_TOPIC_AFFIX_MACHINE=${MQTT_TOPIC_AFFIX_MACHINE}|" /etc/ha-mqtt-broker.conf
 
 install-mqtt-online-status:
-	sudo install -m 755 ./root/usr/local/bin/mqtt-online-status /usr/local/bin/mqtt-online-status
-	sudo install -m 644 ./root/etc/systemd/system/mqtt-online-status.service /etc/systemd/system/mqtt-online-status.service
+	sudo install -m 755 -pD ./root/usr/local/bin/mqtt-online-status /usr/local/bin/mqtt-online-status
+	sudo install -m 644 -pD ./root/etc/systemd/system/mqtt-online-status.service /etc/systemd/system/mqtt-online-status.service
 	sudo /usr/bin/systemctl enable --now mqtt-online-status.service
 
 uninstall-mqtt-online-status:
@@ -99,8 +99,8 @@ install-g15daemon:
 	cd $$HOME/src/libg15 && sudo make install
 	cd $$HOME/src/libg15render && sudo make install
 	cd $$HOME/src/g15daemon && sudo make install
-	sudo install -m 644 ./root/etc/systemd/system/g15daemon.service /etc/systemd/system/g15daemon.service
-	sudo install -m 644 ./root/etc/systemd/system/g15daemon-suspend-resume.service /etc/systemd/system/g15daemon-suspend-resume.service
+	sudo install -m 644 -pD ./root/etc/systemd/system/g15daemon.service /etc/systemd/system/g15daemon.service
+	sudo install -m 644 -pD ./root/etc/systemd/system/g15daemon-suspend-resume.service /etc/systemd/system/g15daemon-suspend-resume.service
 	sudo /usr/bin/systemctl daemon-reload 
 	sudo /usr/bin/systemctl enable --now g15daemon.service
 	sudo /usr/bin/systemctl enable --now g15daemon-suspend-resume.service

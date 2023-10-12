@@ -16,8 +16,8 @@ while true; do
 		done
 	done
 	if ${DEBUG}; then
-		echo ${BIN_PUB} -h ${HOST} -u ${USER} -P ${PASS} -t ${TOPIC} -m ${PAYLOAD}
+		echo ${MQTT_BIN_PUB} -h ${MQTT_HOST} -u ${MQTT_USER} -P ${MQTT_PASS} -t ${TOPIC} -m ${PAYLOAD}
 	fi
-	${BIN_PUB} -h ${HOST} -u ${USER} -P ${PASS} -t ${TOPIC} -m ${PAYLOAD}
+	${MQTT_BIN_PUB} -h ${MQTT_HOST} -u ${MQTT_USER} -P ${MQTT_PASS} -t ${TOPIC} -m ${PAYLOAD}
 	sleep 5
 done
