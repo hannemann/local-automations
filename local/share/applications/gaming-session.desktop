@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Name=Gaming Session
+Comment=Start some stuff
+Exec=gaming-session
+Icon=input-gaming-symbolic
+Terminal=false
+Type=Application

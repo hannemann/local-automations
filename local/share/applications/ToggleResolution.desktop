@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=ToggleResolution
+Comment=Set Resolution to cover the whole screen
+Exec=setresolution HDMI-1 toggle
+Icon=view-fullscreen-symbolic
+Terminal=false
+Type=Application
+Categories=Video;

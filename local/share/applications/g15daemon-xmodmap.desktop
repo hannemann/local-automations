@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Name=Load the Xmodmap for g15daemon
+Exec=/usr/bin/xmodmap /home/hannemann/.Xmodmap
+Icon=input-keyboard-symbolic
+Terminal=false
+Type=Application
+#Hidden=true

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Name=Desktop Session
+Comment=Start some stuff
+Exec=desktop-session
+Icon=computer-symbolic
+Terminal=false
+Type=Application

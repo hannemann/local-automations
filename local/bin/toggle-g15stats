@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+G15PID=$(pgrep g15stats)
+
+if [[ ! -z $G15PID ]]; then
+	kill $G15PID
+else
+	g15stats -d
+fi

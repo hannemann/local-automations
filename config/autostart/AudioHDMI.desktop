@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=AudioHDMI
+Comment=Set HDMI as default audio output
+Exec=pa-default-sink hdmi
+Icon=audio-speakers-symbolic
+Terminal=false
+Type=Application
+Categories=AudioVideo;
