@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-. $HOME/.local/etc/mqtt-broker.conf
+. /etc/ha-mqtt-broker.conf
 
-TP_STAT=stat/steam/hannemann
-TP_REMOTE=steam/remote/desktop-hannemann
+TP_STAT=stat/steam/${MQTT_TOPIC_AFFIX_MACHINE}
+TP_REMOTE=steam/remote/${MQTT_TOPIC_AFFIX_MACHINE}
 CAN_RUN=true
 
 function pubState()
 {
-	$BIN_PUB -h $HOST -u $USER -P $PASS -t $TP_STAT -m $1
+	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m $1
 }
 
 function cleanup()
@@ -72,6 +72,6 @@ do
 		*)
 			;;
 	esac
-done < <( $BIN_SUB -h $HOST -u $USER -P $PASS -t $TP_REMOTE -q 1 --will-topic $TP_STAT --will-payload off)
+done < <( $MQTT_BIN_SUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_REMOTE -q 1 --will-topic $TP_STAT --will-payload off)
 
 echo Steam Remote exit...

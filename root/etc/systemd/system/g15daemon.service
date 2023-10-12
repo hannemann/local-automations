@@ -1,0 +1,15 @@
+[Unit]
+Description=G15 Daemon
+Documentation=man:g15daemon(1)
+Conflicts=suspend.target
+
+[Service]
+Type=forking
+PIDFile=/run/g15daemon.pid
+ExecStart=/sbin/g15daemon
+ExecStop=/sbin/g15daemon -k
+Environment=LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
+TimeoutStopSec=5
+
+[Install]
+WantedBy=multi-user.target

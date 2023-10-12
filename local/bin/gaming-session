@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+setresolution HDMI-1 hd
+pa-default-sink hdmi

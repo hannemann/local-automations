@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+. /etc/ha-mqtt-broker.conf
+
+PIDFILE=/run/mqtt-online-status
+ACTIVE=true
+
+TP_STAT=stat/${MQTT_TOPIC_AFFIX_MACHINE}
+TP_CMD=cmd/${MQTT_TOPIC_AFFIX_MACHINE}
+
+echo $$ > $PIDFILE
+
+function cleanup()
+{
+	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m off
+	rm $PIDFILE
+	ACTIVE=false
+	exit 0
+}
+
+function startup()
+{
+	echo $$ > $PIDFILE
+	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m on
+	while read msg; do
+		case $msg in
+		reboot)
+			echo received reboot command
+			/bin/systemctl reboot;
+			;;
+		shutdown)
+			echo received shutdown command
+			/bin/systemctl poweroff;
+			;;
+
+		*)
+			;;
+		esac
+	done < <( $MQTT_BIN_SUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_CMD -q 1)
+
+}
+
+trap "cleanup" SIGINT SIGTERM SIGKILL
+startup &
+
+while $ACTIVE; do
+	#echo running
+	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m on
+	sleep 5
+done;

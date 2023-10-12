@@ -1,0 +1,10 @@
+[Unit]
+Description=mqtt pc status
+Requires=network-online.target
+After=default.target
+
+[Service]
+ExecStart=/usr/local/bin/mqtt-online-status
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+setresolution HDMI-1 full
+pa-default-sink hdmi
+[ -z $(pgrep -f nextcloud) ] && nextcloud &
