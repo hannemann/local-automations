@@ -4,24 +4,76 @@
 
 PIDFILE=/run/mqtt-online-status
 ACTIVE=true
+LOCK_PID=0
+LOCKFILE=$(mktemp)
+LAST_STATE=none
 
 TP_STAT=stat/${MQTT_TOPIC_AFFIX_MACHINE}
 TP_CMD=cmd/${MQTT_TOPIC_AFFIX_MACHINE}
 
 echo $$ > $PIDFILE
 
+function publish_state() {
+	if [[ ${LAST_STATE} != $1 ]]; then
+		echo Publishing state $1
+		LAST_STATE=$1
+	fi
+	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m $1
+}
+
 function cleanup()
 {
-	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m off
+	publish_state off
 	rm $PIDFILE
+	rm ${LOCKFILE}
 	ACTIVE=false
 	exit 0
+}
+
+function handle_suspend()
+{
+	echo Suspending...
+	publish_state off
+	/usr/bin/kill $(/usr/bin/cat ${LOCKFILE})
+}
+
+function handle_wakeup() {
+	echo Waking up...
+	get_inhibit_lock
+	publish_state on
+}
+
+function get_inhibit_lock()
+{
+	echo Obtain inhibit lock...
+	/usr/bin/systemd-inhibit --who=mqtt-online-status --what=sleep --why="send message" --mode=delay /usr/bin/sleep infinity &
+	echo $! > ${LOCKFILE}
+	echo Current lock pid: $(/usr/bin/cat ${LOCKFILE}) 
+}
+
+function monitorDbus()
+{
+	echo Monitoring dbus...
+	while read msg; do
+		if [[ "$msg" =~ .*"PrepareForSleep".* ]]; then
+			case $msg in
+				*true*)
+					echo Dbus told us to prepare for sleep...
+					handle_suspend
+					;;
+				*)
+					echo Dbus told us we should wake up...
+					handle_wakeup
+					;;
+			esac
+		fi
+
+	done < <(/usr/bin/gdbus monitor -y -d org.freedesktop.login1)
 }
 
 function startup()
 {
 	echo $$ > $PIDFILE
-	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m on
 	while read msg; do
 		case $msg in
 		reboot)
@@ -32,7 +84,10 @@ function startup()
 			echo received shutdown command
 			/bin/systemctl poweroff;
 			;;
-
+		suspend)
+			echo received suspend command
+			/bin/systemctl suspend
+			;;
 		*)
 			;;
 		esac
@@ -41,10 +96,16 @@ function startup()
 }
 
 trap "cleanup" SIGINT SIGTERM SIGKILL
+trap "suspend" SIGUSR1
+trap "wakeup" SIGUSR2
+get_inhibit_lock
 startup &
+monitorDbus &
 
 while $ACTIVE; do
-	#echo running
-	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m on
+	LOCK_PID=$(cat ${LOCKFILE})
+	if [[ ${LOCK_PID} -gt 0 ]] && ps -p ${LOCK_PID} > /dev/null; then
+		publish_state on
+	fi
 	sleep 5
 done;
