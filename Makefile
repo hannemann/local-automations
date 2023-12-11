@@ -153,6 +153,7 @@ uninstall-g15-utils:
 install-sleep-inhibitor:
 	sudo install -m 644 -pD ./root/etc/systemd/system/sleep-inhibitor.service /etc/systemd/system/sleep-inhibitor.service
 	sudo install -m 755 -pD ./root/usr/local/bin/sleep-inhibitor /usr/local/bin/sleep-inhibitor
+	sudo install -pD ./root/etc/sleep-inhibitor/sleep-inhibitor.d/* -t /etc/sleep-inhibitor/sleep-inhibitor.d/
 	sudo /usr/bin/systemctl daemon-reload
 	sudo /usr/bin/systemctl enable --now sleep-inhibitor.service
 
@@ -161,3 +162,7 @@ uninstall-sleep-inhibitor:
 	sudo rm /etc/systemd/system/sleep-inhibitor.service
 	sudo rm /usr/local/bin/sleep-inhibitor
 	sudo /usr/bin/systemctl daemon-reload
+
+reinstall-sleep-inhibitor:
+	$(MAKE) uninstall-sleep-inhibitor
+	$(MAKE) install-sleep-inhibitor

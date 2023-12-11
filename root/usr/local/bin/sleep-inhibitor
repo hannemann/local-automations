@@ -2,15 +2,14 @@
 
 PIDFILE=/run/sleep-inhibitor
 ACTIVE=true
-LOCK_PID=0
-LOCKFILE=$(mktemp)
+CONF_DIR=/etc/sleep-inhibitor/sleep-inhibitor.d
+declare -A LOCK_PIDS
 
 echo $$ > $PIDFILE
 
 function cleanup()
 {
 	rm $PIDFILE
-	rm ${LOCKFILE}
 	ACTIVE=false
 	exit 0
 }
@@ -19,25 +18,42 @@ function handle_suspend()
 {
 	echo Suspending...
 	# do your things...
-	systemctl stop g15daemon	
-	# clear lock
-	/usr/bin/kill $(/usr/bin/cat ${LOCKFILE})
+	cd ${CONF_DIR}
+	for FILE in *.conf; do
+		CONF="${FILE%.conf}"
+		source ${FILE}
+		echo "Executing task '${DOWN}'..."
+		eval ${DOWN}
+		# clear lock
+		/usr/bin/kill ${LOCK_PIDS[${CONF}]}
+	done
 }
 
 function handle_wakeup() {
 	echo Waking up...
-	# aquire new lock
-	get_inhibit_lock
+	# aquire new locks
+	get_inhibit_locks
 	# do your things
-	systemctl start g15daemon	
+	cd ${CONF_DIR}
+	for FILE in *.conf; do
+		CONF="${FILE%.conf}"
+		source ${FILE}
+		echo "Executing task '${UP}'..."
+		eval ${UP}
+	done
 }
 
-function get_inhibit_lock()
+function get_inhibit_locks()
 {
-	echo Obtain inhibit lock...
-	/usr/bin/systemd-inhibit --who=sleep-inhibitor --what=sleep --why="perform tasks" --mode=delay /usr/bin/sleep infinity &
-	echo $! > ${LOCKFILE}
-	echo Current lock pid: $(/usr/bin/cat ${LOCKFILE}) 
+	echo Obtain inhibit locks...
+	cd ${CONF_DIR}
+	for FILE in *.conf; do
+		CONF="${FILE%.conf}"
+		source ${FILE}
+		/usr/bin/systemd-inhibit --who=sleep-inhibitor --what=sleep --why="${WHY}" --mode=delay /usr/bin/sleep infinity &
+		LOCK_PIDS[${CONF}]=$!
+		echo ${CONF} lock pid: $(echo ${LOCK_PIDS[${CONF}]}) 
+	done
 }
 
 function monitorDbus()
@@ -50,7 +66,7 @@ function monitorDbus()
 					echo Dbus told us to prepare for sleep...
 					handle_suspend
 					;;
-				*)
+				*false*)
 					echo Dbus told us we should wake up...
 					handle_wakeup
 					;;
@@ -63,7 +79,7 @@ function monitorDbus()
 trap "cleanup" SIGINT SIGTERM SIGKILL
 trap "suspend" SIGUSR1
 trap "wakeup" SIGUSR2
-get_inhibit_lock
+get_inhibit_locks
 monitorDbus &
 
 while $ACTIVE; do
