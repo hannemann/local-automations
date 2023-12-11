@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+PIDFILE=/run/sleep-inhibitor
+ACTIVE=true
+LOCK_PID=0
+LOCKFILE=$(mktemp)
+
+echo $$ > $PIDFILE
+
+function cleanup()
+{
+	rm $PIDFILE
+	rm ${LOCKFILE}
+	ACTIVE=false
+	exit 0
+}
+
+function handle_suspend()
+{
+	echo Suspending...
+	# do your things...
+	systemctl stop g15daemon	
+	# clear lock
+	/usr/bin/kill $(/usr/bin/cat ${LOCKFILE})
+}
+
+function handle_wakeup() {
+	echo Waking up...
+	# aquire new lock
+	get_inhibit_lock
+	# do your things
+	systemctl start g15daemon	
+}
+
+function get_inhibit_lock()
+{
+	echo Obtain inhibit lock...
+	/usr/bin/systemd-inhibit --who=sleep-inhibitor --what=sleep --why="perform tasks" --mode=delay /usr/bin/sleep infinity &
+	echo $! > ${LOCKFILE}
+	echo Current lock pid: $(/usr/bin/cat ${LOCKFILE}) 
+}
+
+function monitorDbus()
+{
+	echo Monitoring dbus...
+	while read msg; do
+		if [[ "$msg" =~ .*"PrepareForSleep".* ]]; then
+			case $msg in
+				*true*)
+					echo Dbus told us to prepare for sleep...
+					handle_suspend
+					;;
+				*)
+					echo Dbus told us we should wake up...
+					handle_wakeup
+					;;
+			esac
+		fi
+
+	done < <(/usr/bin/gdbus monitor -y -d org.freedesktop.login1)
+}
+
+trap "cleanup" SIGINT SIGTERM SIGKILL
+trap "suspend" SIGUSR1
+trap "wakeup" SIGUSR2
+get_inhibit_lock
+monitorDbus &
+
+while $ACTIVE; do
+	sleep 5
+done;

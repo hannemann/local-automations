@@ -1,0 +1,9 @@
+[Unit]
+Description=Start daemon that monitors dbus to perform tasks when system goes to sleep or wakes up
+After=default.target
+
+[Service]
+ExecStart=/usr/local/bin/sleep-inhibitor
+
+[Install]
+WantedBy=default.target

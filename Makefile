@@ -100,19 +100,15 @@ install-g15daemon:
 	cd $$HOME/src/libg15render && sudo make install
 	cd $$HOME/src/g15daemon && sudo make install
 	sudo install -m 644 -pD ./root/etc/systemd/system/g15daemon.service /etc/systemd/system/g15daemon.service
-	sudo install -m 644 -pD ./root/etc/systemd/system/g15daemon-suspend-resume.service /etc/systemd/system/g15daemon-suspend-resume.service
 	sudo /usr/bin/systemctl daemon-reload 
 	sudo /usr/bin/systemctl enable --now g15daemon.service
-	sudo /usr/bin/systemctl enable --now g15daemon-suspend-resume.service
 	install -m 644 ./g15daemon/Xmodmap $$HOME/.Xmodmap
 	# next line does not work... left here for reference
 	/usr/bin/xmodmap $$HOME/.Xmodmap
 
 uninstall-g15daemon:
 	- sudo /usr/bin/systemctl disable --now g15daemon.service
-	- sudo /usr/bin/systemctl disable --now g15daemon-suspend-resume.service
 	- sudo rm /etc/systemd/system/g15daemon.service
-	- sudo rm /etc/systemd/system/g15daemon-suspend-resume.service
 	sudo /usr/bin/systemctl daemon-reload 
 	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/libg15.git
 	cd $$HOME/src/libg15 && sudo make uninstall
@@ -153,3 +149,15 @@ uninstall-g15-utils:
 	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && ./autogen.sh
 	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && ./configure
 	cd $$HOME/src/g15daemon-addons/g15daemon-clients/g15-utils && sudo make uninstall
+
+install-sleep-inhibitor:
+	sudo install -m 644 -pD ./root/etc/systemd/system/sleep-inhibitor.service /etc/systemd/system/sleep-inhibitor.service
+	sudo install -m 755 -pD ./root/usr/local/bin/sleep-inhibitor /usr/local/bin/sleep-inhibitor
+	sudo /usr/bin/systemctl daemon-reload
+	sudo /usr/bin/systemctl enable --now sleep-inhibitor.service
+
+uninstall-sleep-inhibitor:
+	sudo /usr/bin/systemctl disable --now sleep-inhibitor.service
+	sudo rm /etc/systemd/system/sleep-inhibitor.service
+	sudo rm /usr/local/bin/sleep-inhibitor
+	sudo /usr/bin/systemctl daemon-reload
