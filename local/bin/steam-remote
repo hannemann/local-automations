@@ -61,10 +61,10 @@ do
 			DISPLAY=:0 /usr/bin/xdotool keydown alt key Tab; sleep 0.2; DISPLAY=:0 /usr/bin/xdotool keyup alt;
 			;;
 		screenUltraWide)
-			gnome-monitor-config set -LpM DP-1 -m 3440x1440@120.000;
+			$HOME/.local/bin/setresolution HDMI-1 full;
 			;;
 		screenFullHD)
-			gnome-monitor-config set -LpM DP-1 -m 1920x1080@59.963 -M HDMI-1 -m 1920x1080@60.000;
+			$HOME/.local/bin/setresolution HDMI-1 hd;
 			;;
 		audioHdmi)
 			/usr/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.hdmi-stereo

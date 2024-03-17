@@ -1,0 +1,15 @@
+[Unit]
+Description=Reset Monitor to default resolution on shutdown/boot?
+After=graphical-session.target
+
+[Service]
+#Environment=PATH=$PATH:%h/.local/bin:%h/bin
+Type=oneshot
+RemainAfterExit=true
+ExecStartPre=/usr/bin/sleep 6
+ExecStart=%h/.local/bin/gaming-session
+#ExecStop=%h/.local/bin/gaming-session
+#ExecStartPost=/usr/bin/sleep 5
+
+[Install]
+WantedBy=graphical-session.target

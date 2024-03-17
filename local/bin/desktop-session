@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-. /etc/ha-mqtt-broker.conf
-TP_REMOTE=steam/remote/${MQTT_TOPIC_AFFIX_MACHINE}
-${MQTT_BIN_PUB} -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_REMOTE -m screenUltraWide
+setresolution HDMI-1 full
 pa-default-sink hdmi
 [ -z $(pgrep -f nextcloud) ] && nextcloud &
