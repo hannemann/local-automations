@@ -3,4 +3,4 @@
 echo $PATH
 
 $HOME/.local/bin/setresolution HDMI-1 hd
-#$HOME/.local/bin/pa-default-sink hdmi
+$HOME/.local/bin/pa-default-sink hdmi
