@@ -70,6 +70,13 @@ restart:
 	/usr/bin/systemctl --user restart steam-remote.service
 	sudo /usr/bin/systemctl restart mqtt-online-status.service
 
+install-steam-remote:
+	- /usr/bin/systemctl --user disable --now steam-remote.service
+	install -pD ./local/bin/steam-remote -t $$HOME/.local/bin/
+	install -pD ./config/systemd/user/steam-remote.service -t $$HOME/.config/systemd/user/
+	- /usr/bin/systemctl --user daemon-reload
+	- /usr/bin/systemctl --user enable --now steam-remote.service
+
 mqtt-config:
 	sudo sed -i "s|MQTT_HOST=.*|MQTT_HOST=${MQTT_HOST}|" /etc/ha-mqtt-broker.conf
 	sudo sed -i "s|MQTT_USER=.*|MQTT_USER=${MQTT_USER}|" /etc/ha-mqtt-broker.conf

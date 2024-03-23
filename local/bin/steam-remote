@@ -17,11 +17,30 @@ function cleanup()
 	pubState off
 }
 
+function getSteamShPid()
+{
+	/usr/bin/pgrep -f 'steam.sh'
+}
+
+function runSteam()
+{
+	echo "Attempt to start steam on display $DISPLAY..."
+	echo "DISPLAY=$DISPLAY /usr/bin/gtk-launch steam" | at now > /dev/null
+}
+
+function stopSteam()
+{
+	if getSteamShPid > /dev/null; then
+		/usr/bin/kill --verbose --timeout 30000 TERM --timeout 5000 KILL $(cat .steampid)
+		pubState off
+	fi
+}
+
 trap "cleanup" SIGINT SIGTERM SIGKILL
 
 while [ $CAN_RUN ]; do
 	sleep 5
-	RUNNING=$(/usr/bin/pgrep -f 'steam.sh' > /dev/null && echo on || echo off)
+	RUNNING=$(getSteamShPid > /dev/null && echo on || echo off)
 	pubState $RUNNING
 done &
 
@@ -30,17 +49,16 @@ while read msg;
 do
 	case $msg in
 		restart)
-			/usr/bin/steam -shutdown;
-			sleep 10
-			/usr/bin/pgrep -f 'steam.sh' > /dev/null && /usr/bin/pkill -F $HOME/.steampid;
-			sleep 5
-			echo "DISPLAY=:0 /usr/bin/gtk-launch steam" | at now > /dev/null
+			echo "Attempt to restart steam...":
+			stopSteam:
+			sleep 2;
+			runSteam;
 			;;
 		start)
-			echo "DISPLAY=:0 /usr/bin/gtk-launch steam" | at now > /dev/null
+			runSteam;
 			;;
 		stop)
-			/usr/bin/steam -shutdown;
+			stopSteam;
 			;;
 		bigpicture)
 			/usr/bin/steam steam://open/bigpicture;
@@ -67,7 +85,7 @@ do
 			$HOME/.local/bin/setresolution HDMI-1 hd;
 			;;
 		audioHdmi)
-			/usr/bin/pactl set-default-sink alsa_output.pci-0000_03_00.1.hdmi-stereo
+			$HOME/.local/bin/pa-default-sink hdmi;
 			;;
 		*)
 			;;
