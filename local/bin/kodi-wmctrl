@@ -1,19 +1,28 @@
 #!/usr/bin/env bash
 
+# When wayland becomes an option
+# @see https://github.com/ickyicky/window-calls
+# @see https://github.com/hseliger/window-calls-extended
+# @see https://git.sr.ht/~brocellous/wlrctl
+
 [ -z $1 ] && exit 1
 
 ID=$(wmctrl -lp | grep Kodi | awk '{print $1}' | xargs -I{} printf '%d\n' {})
 
 if [[ $1 == small ]]; then
-	wmctrl -r Kodi -e 0,-1,-1,1024,576
+	wmctrl -xr Kodi.Kodi -e 0,-1,-1,1024,576
+fi
+
+if [[ $1 == extra-small ]]; then
+	wmctrl -xr Kodi.Kodi -e 0,-1,-1,384,216
 fi
 
 if [[ $1 == toggle-above ]]; then
 	IS_ABOVE=$(xprop -id $ID _NET_WM_STATE | grep -o 'ABOVE')
 	if [[ $IS_ABOVE ]]; then
-		wmctrl -r Kodi -b remove,above
+		wmctrl -xr Kodi.Kodi -b remove,above
 	else
-		wmctrl -r Kodi -b toggle,above
+		wmctrl -xr Kodi.Kodi -b toggle,above
 	fi
 fi
 

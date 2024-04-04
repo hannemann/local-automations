@@ -14,7 +14,7 @@ Categories=AudioVideo;Video;Player;TV;
 StartupWMClass=Kodi
 SingleMainWindow=true
 
-Actions=Fullscreen;Standalone;Small;Above;
+Actions=Fullscreen;Standalone;Small;ExtraSmall;Above;
 
 X-Desktop-File-Install-Version=0.26
 
@@ -31,6 +31,10 @@ Exec=kodi --standalone --windowing=x11
 [Desktop Action Small]
 Name=Resolution 1024x576
 Exec=kodi-wmctrl small
+
+[Desktop Action ExtraSmall]
+Name=Resolution 384x216
+Exec=kodi-wmctrl extra-small
 
 [Desktop Action Above]
 Name=Always on top
