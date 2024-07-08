@@ -3,12 +3,18 @@
 . /etc/ha-mqtt-broker.conf
 
 TP_STAT=stat/steam/${MQTT_TOPIC_AFFIX_MACHINE}
+TP_SCREENSAVER_STAT=stat/screensaver/${MQTT_TOPIC_AFFIX_MACHINE}
 TP_REMOTE=steam/remote/${MQTT_TOPIC_AFFIX_MACHINE}
 CAN_RUN=true
 
 function pubState()
 {
 	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_STAT -m $1
+}
+
+function pubScreenSaverState()
+{
+	$MQTT_BIN_PUB -h $MQTT_HOST -u $MQTT_USER -P $MQTT_PASS -t $TP_SCREENSAVER_STAT -m $1
 }
 
 function cleanup()
@@ -40,6 +46,9 @@ trap "cleanup" SIGINT SIGTERM SIGKILL
 
 while [ $CAN_RUN ]; do
 	sleep 5
+	SCREENSAVER=$(/usr/bin/dbus-send --session --dest=org.gnome.ScreenSaver --type=method_call --print-reply /org/gnome/ScreenSaver org.gnome.ScreenSaver.GetActive | grep boolean | awk '{ print $2 }')
+	SCREENSAVER=$([[ $SCREENSAVER == "true" ]] && echo on || echo off)
+	pubScreenSaverState $SCREENSAVER
 	RUNNING=$(getSteamShPid > /dev/null && echo on || echo off)
 	pubState $RUNNING
 done &
@@ -86,6 +95,12 @@ do
 			;;
 		audioHdmi)
 			$HOME/.local/bin/pa-default-sink hdmi;
+			;;
+		screensaverOff)
+			/usr/bin/dbus-send --session --dest=org.gnome.ScreenSaver --type=method_call /org/gnome/ScreenSaver org.gnome.ScreenSaver.SetActive boolean:false;
+			;;
+		screensaverOn)
+			/usr/bin/dbus-send --session --dest=org.gnome.ScreenSaver --type=method_call /org/gnome/ScreenSaver org.gnome.ScreenSaver.SetActive boolean:true;
 			;;
 		*)
 			;;
