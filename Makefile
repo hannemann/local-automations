@@ -30,12 +30,14 @@ install:
 	/usr/bin/systemctl --user daemon-reload
 	/usr/bin/systemctl --user enable --now desktop-lights-control.service
 	/usr/bin/systemctl --user enable --now steam-remote.service
+	/usr/bin/systemctl --user enable --now set-monitor-defaults.service
 	# autostart
 	install -m 644 -pD ./config/autostart/* -t $$HOME/.config/autostart
 
 uninstall:
 	- /usr/bin/systemctl --user disable --now desktop-lights-control.service
 	- /usr/bin/systemctl --user disable --now steam-remote.service
+	- /usr/bin/systemctl --user disable --now set-monitor-defaults.service
 	- /usr/bin/systemctl --user daemon-reload
 	- cd ./config/systemd/user; find . -type f -exec rm $$HOME/.config/systemd/user/{} \;
 	cd -
@@ -109,6 +111,7 @@ uninstall-gnome-monitor-config:
 	rm -rf $$HOME/src/gnome-monitor-config
 
 build-g15daemon:
+	sudo zypper in libusb-devel
 	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/libg15.git
 	cd $$HOME/src/libg15 && git pull && ./configure && make clean && make
 	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/libg15render.git
