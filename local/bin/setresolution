@@ -7,10 +7,11 @@ scale=${3:-1}
 hd=\'1920x1080@60.000\'
 full=\'3440x1440@59.999\'
 
+DP_PORT=$(/usr/local/bin/gnome-monitor-config list | grep -om 1 'DP-[0-9]')
 if [[ $2 == full ]]; then
-  /usr/local/bin/gnome-monitor-config set -LpM DP-1 -m 3440x1440@120.000;
+  /usr/local/bin/gnome-monitor-config set -LpM ${DP_PORT} -m 3440x1440@120.000;
 elif [[ $2 == hd ]]; then
-  /usr/local/bin/gnome-monitor-config set -LpM DP-1 -m 1920x1080@59.963 -M HDMI-1 -m 1920x1080@60.000;
+  /usr/local/bin/gnome-monitor-config set -LpM ${DP_PORT} -m 1920x1080@59.963 -M HDMI-1 -m 1920x1080@60.000;
 fi
 
 exit

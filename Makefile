@@ -126,6 +126,8 @@ install-g15daemon:
 	sudo install -m 644 -pD ./root/etc/systemd/system/g15daemon.service /etc/systemd/system/g15daemon.service
 	sudo /usr/bin/systemctl daemon-reload 
 	sudo /usr/bin/systemctl enable --now g15daemon.service
+	sudo install -m 644 -pD ./root/etc/udev/rules.d/99-g15daemon.rules /etc/udev/rules.d/99-g15daemon.rules
+	sudo udevadm control --reload-rules && sudo udevadm trigger
 	install -m 644 ./g15daemon/Xmodmap $$HOME/.Xmodmap
 	# next line does not work... left here for reference
 	/usr/bin/xmodmap $$HOME/.Xmodmap
@@ -133,7 +135,9 @@ install-g15daemon:
 uninstall-g15daemon:
 	- sudo /usr/bin/systemctl disable --now g15daemon.service
 	- sudo rm /etc/systemd/system/g15daemon.service
-	sudo /usr/bin/systemctl daemon-reload 
+	- sudo rm /etc/udev/rules.d/99-g15daemon.rules
+	sudo /usr/bin/systemctl daemon-reload
+	sudo udevadm control --reload-rules && sudo udevadm trigger
 	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/libg15.git
 	cd $$HOME/src/libg15 && sudo make uninstall
 	- cd $$HOME/src && /usr/bin/git clone git@github.com:hannemann/libg15render.git

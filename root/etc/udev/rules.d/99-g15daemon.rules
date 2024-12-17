@@ -1,0 +1,2 @@
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c226", RUN+="/usr/bin/systemctl --no-block start g15daemon.service"
+ACTION=="remove", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ENV{PRODUCT}=="46d/c226/100", RUN+="/usr/bin/systemctl --no-block stop g15daemon.service"
