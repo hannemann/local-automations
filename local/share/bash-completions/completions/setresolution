@@ -1,0 +1,10 @@
+#/usr/bin/env bash
+
+
+_setresolution_completions() {
+#	COMPREPLY+=("desktop")
+#	COMPREPLY+=("gamestream")
+	COMPREPLY=($(compgen -W "desktop gamestream" "${COMP_WORDS[1]}"))
+}
+
+complete -F _setresolution_completions setresolution

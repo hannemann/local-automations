@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 
-echo $PATH
-
-$HOME/.local/bin/setresolution HDMI-1 hd
-$HOME/.local/bin/pa-default-sink HDMI
+setresolution gamestream
+pa-default-sink HDMI

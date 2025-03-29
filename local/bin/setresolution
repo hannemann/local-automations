@@ -1,74 +1,15 @@
 #!/bin/bash
-#hack script to change resolution from a command line under Ubuntu Wayland by Douwe
-#stolen from https://github.com/douwe-2/SetResolutionForUbuntuWayland
 
-monitor=\'$1\'
-scale=${3:-1}
-hd=\'1920x1080@60.000\'
-full=\'3440x1440@59.999\'
+DP_PORT=$(gdctl show | grep -o 'Monitor D.*' | awk '{print $2}')
+HDMI_PORT=$(gdctl show | grep -o 'Monitor H.*' | awk '{print $2}')
 
-DP_PORT=$(/usr/local/bin/gnome-monitor-config list | grep -om 1 'DP-[0-9]')
-if [[ $2 == full ]]; then
-  /usr/local/bin/gnome-monitor-config set -LpM ${DP_PORT} -m 3440x1440@120.000;
-elif [[ $2 == hd ]]; then
-  /usr/local/bin/gnome-monitor-config set -LpM ${DP_PORT} -m 1920x1080@59.963 -M HDMI-1 -m 1920x1080@60.000;
+MODE_FULL="3440x1440@144.000"
+MODE_HD="1920x1080@60.000"
+
+if [[ $1 == desktop ]]; then
+	gdctl set -LpM ${DP_PORT} -m ${MODE_FULL}
 fi
 
-exit
-
-function getCurrentState() {
-	gdbus call -e -d org.gnome.Mutter.DisplayConfig -o /org/gnome/Mutter/DisplayConfig -m org.gnome.Mutter.DisplayConfig.GetCurrentState \
-		| awk -F'),' -v OFS='\n' '{$1=$1}1' | tr  "[()],'" ' '  | sed 's/ [ ]* / /g'
-}
-
-if [[ $2 == hd ]]; then
-	resolution=$hd
-elif [[ $2 == full ]]; then
-	resolution=$full
-elif [[ $2 == toggle ]]; then
-	state=$(getCurrentState | grep is-current | xargs | cut -d' ' -f 1)
-	if [[ \'$state\' == $full ]]; then
-		resolution=$hd
-	else
-		resolution=$full
-	fi
-else
-	resolution=\'$2\'
+if [[ $1 == gamestream ]]; then
+	gdctl set -LpM ${DP_PORT} -m ${MODE_HD} -LM ${HDMI_PORT} -m ${MODE_HD} --right-of ${DP_PORT}
 fi
-
-if [ "$1" == "--help" ]
-then
-  echo -e `basename $0`" monitor resolution [scale]\n"
-  echo "If the monitor parameter is not given a list of available resolutions (and their scales) per monitor will be listed"
-  echo "If you do not specify the refresh rate for a resolution the first one in the list will be used"
-  echo -e  "\nExample: "`basename $0`" HDMI-1 800x600@60.316539764404297 2.0"
-  exit 0
-fi
-
-if [ -z "$1" ]
-then
-  getCurrentState | \
-  perl -lne  'print /([ 0-9]*x[0-9]*\@[\.0-9]*) .*( 1.0 [ .0-9]*).*|uint32 [0-9]* ([A-Za-z0-9-]* ).*/'
-  echo  -e "\nType "`basename $0`" --help for help"
- exit 0
-fi
-
-if [[ ! "$resolution" == *@* ]]
-then
-  resolution=\'`getCurrentState | \
-  perl -lne  'print /([ 0-9]*x[0-9]*\@[\.0-9]*) .*( 1.0 [ .0-9]*).*|uint32 [0-9]* ([A-Za-z0-9-]* ).*/' | grep "$resolution" | awk '{print $1}' | head -1`\'
-fi
-
-
-serial=`gdbus call --session --dest org.gnome.Mutter.DisplayConfig \
-  --object-path /org/gnome/Mutter/DisplayConfig \
-  --method org.gnome.Mutter.DisplayConfig.GetResources | awk '{print $2}' | tr -d ','`
-  
-gdbus call --session --dest org.gnome.Mutter.DisplayConfig \
-  --object-path /org/gnome/Mutter/DisplayConfig \
-  --method org.gnome.Mutter.DisplayConfig.ApplyMonitorsConfig \
-  $serial 1 "[(0, 0, $scale, 0, true, [($monitor, $resolution, [] )] )]" "[]" > /dev/null
-  
-  
-    
-

@@ -23,7 +23,6 @@ install:
 	[ -f $$HOME/.local/etc/desktop-lights-control.conf ] || install -m 700 -pD ./local/etc/desktop-lights-control.conf $$HOME/.local/etc/desktop-lights-control.conf
 	[ -d $$HOME/.local/etc/desktop-lights-control.d ] || install -m 700 -pD ./local/etc/desktop-lights-control.d/* -t $$HOME/.local/etc/desktop-lights-control.d/
 	install -m 640 -pD ./config/pulse-scripts/entities $$HOME/.config/pulse-scripts/entities
-	$(MAKE) install-gnome-monitor-config
 	$(MAKE) mqtt-config
 	$(MAKE) install-mqtt-online-status
 	# systemd
@@ -46,7 +45,6 @@ uninstall:
 	- cd ./local/bin/; find . -type f -exec rm $$HOME/.local/bin/{} \;
 	cd -
 	- rmdir $$HOME/.local/bin
-	$(MAKE) uninstall-gnome-monitor-config
 	$(MAKE) uninstall-mqtt-online-status
 	sudo rm /etc/ha-mqtt-broker.conf
 	cd $$HOME/src/pulse-scripts && make uninstall
@@ -66,6 +64,13 @@ prune:
 	cd -
 	- rmdir $$HOME/.local/etc/desktop-lights-control.d
 	- rmdir $$HOME/.local/etc
+
+install-completions:
+	install -pD ./local/share/bash-completions/completions/* -t $$HOME/.local/share/bash-completion/completions
+
+uninstall-completions:
+	- cd ./local/share/bash-completions/completions; for i in *; do rm $$HOME/.local/share/bash-completion/completions/$$i; done;
+	rmdir -p --ignore-fail-on-non-empty $$HOME/.local/share/bash-completion/completions
 
 restart:
 	/usr/bin/systemctl --user restart desktop-lights-control.service
@@ -97,18 +102,6 @@ uninstall-mqtt-online-status:
 	- sudo rm /etc/systemd/system/mqtt-online-status.service
 	sudo /usr/bin/systemctl daemon-reload 
 	sudo rm /usr/local/bin/mqtt-online-status
-
-install-gnome-monitor-config:
-	sudo zypper in cairo-devel
-	- cd $$HOME/src && /usr/bin/git clone https://github.com/jadahl/gnome-monitor-config.git
-	cd $$HOME/src/gnome-monitor-config && git pull
-	cd $$HOME/src/gnome-monitor-config && meson build
-	cd $$HOME/src/gnome-monitor-config/build && meson compile
-	sudo install -m 755 $$HOME/src/gnome-monitor-config/build/src/gnome-monitor-config /usr/local/bin
-
-uninstall-gnome-monitor-config:
-	sudo rm /usr/local/bin/gnome-monitor-config
-	rm -rf $$HOME/src/gnome-monitor-config
 
 build-g15daemon:
 	sudo zypper in libusb-devel
