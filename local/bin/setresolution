@@ -11,5 +11,5 @@ if [[ $1 == desktop ]]; then
 fi
 
 if [[ $1 == gamestream ]]; then
-	gdctl set -LpM ${DP_PORT} -m ${MODE_HD} -LM ${HDMI_PORT} -m ${MODE_HD} --right-of ${DP_PORT}
+	gdctl set -LpM ${DP_PORT} -m ${MODE_HD} -M ${HDMI_PORT} -m ${MODE_HD}
 fi

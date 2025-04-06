@@ -88,10 +88,10 @@ do
 			DISPLAY=:0 /usr/bin/xdotool keydown alt key Tab; sleep 0.2; DISPLAY=:0 /usr/bin/xdotool keyup alt;
 			;;
 		screenUltraWide)
-			$HOME/.local/bin/setresolution HDMI-1 full;
+			$HOME/.local/bin/setresolution desktop;
 			;;
 		screenFullHD)
-			$HOME/.local/bin/setresolution HDMI-1 hd;
+			$HOME/.local/bin/setresolution gamestream;
 			;;
 		audioHdmi)
 			$HOME/.local/bin/pa-default-sink hdmi;
