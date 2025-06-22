@@ -1,15 +1,16 @@
 #!/bin/bash
 
-DP_PORT=$(gdctl show | grep -o 'Monitor D.*' | awk '{print $2}')
-HDMI_PORT=$(gdctl show | grep -o 'Monitor H.*' | awk '{print $2}')
+CENTER_PORT=$(gdctl show | grep -Po 'Monitor (DP|HDMI)-\d \(Beihai' | awk '{print $2}')
+LEFT_PORT=$(gdctl show | grep -Po 'Monitor (DP|HDMI)-\d \(LG' | awk '{print $2}')
+FAKE_PORT=$(gdctl show | grep -Po 'Monitor (DP|HDMI)-\d \(sisel' | awk '{print $2}')
 
-MODE_FULL="3440x1440@144.000"
-MODE_HD="1920x1080@60.000"
+MODE_UWQHD_144="3440x1440@144.000"
+MODE_HD_60="1920x1080@60.000"
 
 if [[ $1 == desktop ]]; then
-	gdctl set -LpM ${DP_PORT} -m ${MODE_FULL}
+	gdctl set -LpM ${CENTER_PORT} -m ${MODE_UWQHD_144} -LM ${LEFT_PORT} -m ${MODE_HD_60} --left-of ${CENTER_PORT}
 fi
 
 if [[ $1 == gamestream ]]; then
-	gdctl set -LpM ${DP_PORT} -m ${MODE_HD} -M ${HDMI_PORT} -m ${MODE_HD}
+	gdctl set -LpM ${CENTER_PORT} -m ${MODE_HD_60} -M ${FAKE_PORT} -m ${MODE_HD_60}
 fi
