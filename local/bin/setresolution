@@ -6,11 +6,17 @@ FAKE_PORT=$(gdctl show | grep -Po 'Monitor (DP|HDMI)-\d \(sisel' | awk '{print $
 
 MODE_UWQHD_144="3440x1440@144.000"
 MODE_HD_60="1920x1080@60.000"
+MODE_HD_59="1920x1080@59.934"
 
 if [[ $1 == desktop ]]; then
-	gdctl set -LpM ${CENTER_PORT} -m ${MODE_UWQHD_144} -LM ${LEFT_PORT} -m ${MODE_HD_60} --left-of ${CENTER_PORT}
+	gdctl set -LpM ${CENTER_PORT} -m ${MODE_UWQHD_144} -LM ${LEFT_PORT} -m ${MODE_HD_59} --left-of ${CENTER_PORT}
 fi
 
 if [[ $1 == gamestream ]]; then
-	gdctl set -LpM ${CENTER_PORT} -m ${MODE_HD_60} -M ${FAKE_PORT} -m ${MODE_HD_60}
+	gdctl set -LpM ${FAKE_PORT} -m ${MODE_HD_60}
+fi
+
+if [[ $1 == gaming ]]; then
+	#echo gdctl set -LpM ${CENTER_PORT} -m ${MODE_HD_59} -M ${FAKE_PORT} -m ${MODE_HD_60}
+	gdctl set -LpM ${CENTER_PORT} -m ${MODE_UWQHD_144}
 fi

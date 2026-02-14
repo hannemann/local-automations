@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+echo $PATH
+
+$HOME/.local/bin/setresolution gamestream
+$HOME/.local/bin/pa-default-sink "USB Audio Speakers"
