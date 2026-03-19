@@ -66,7 +66,7 @@ EOF
 
   case ${MODE} in
     split)
-        FILTER="[0:v]${SCALE}[v0];[1:v]${SCALE},crop=iw/2:ih:0:0,drawbox=x=iw-2:y=0:w=2:h=ih:color=red@0.05:t=fill[v1];[v0][v1]overlay=0:0"
+        FILTER="[0:v]${SCALE},crop=iw/2:ih:0:0,drawbox=x=iw-2:y=0:w=2:h=ih:color=red@0.05:t=fill[left];[1:v]${SCALE}[right];[right][left]overlay=0:0"
         ;;
     diff)
         FILTER="[0:v]${SCALE}[v0];[1:v]${SCALE}[v1];[v0][v1]blend=all_mode='difference',format=yuv420p"
